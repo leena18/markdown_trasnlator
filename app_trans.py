@@ -21,9 +21,9 @@ def translate_text(text, target_language):
         {"role": "user", "content": text}
     ]
     response = client.chat.completions.create(
-        model="gpt-3.5-turbo",  # Use a suitable model; adjust as needed
+        model="gpt-3.5-turbo",
         messages=messages,
-        max_tokens=2048,  # Adjust as needed
+        max_tokens=2048,
         temperature=0.7
     )
     translated_text = response.choices[0].message.content.strip()
@@ -36,58 +36,31 @@ def summarize_text(text):
         {"role": "user", "content": text}
     ]
     response = client.chat.completions.create(
-        model="gpt-3.5-turbo",  # Use a suitable model; adjust as needed
+        model="gpt-3.5-turbo",
         messages=messages,
-        max_tokens=2048,  # Adjust as needed
+        max_tokens=2048,
         temperature=0.7
     )
     summarized_text = response.choices[0].message.content.strip()
     return summarized_text
 
-# Function to translate summarized text using OpenAI
-def translate_summarized_text(summarized_text, target_language):
-    messages = [
-        {"role": "system", "content": f"Translate the following summarized text to {target_language}."},
-        {"role": "user", "content": summarized_text}
-    ]
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",  # Use a suitable model; adjust as needed
-        messages=messages,
-        max_tokens=2048,  # Adjust as needed
-        temperature=0.7
-    )
-    translated_summarized_text = response.choices[0].message.content.strip()
-    return translated_summarized_text
-
-# Function to convert text to PDF format
-def text_to_pdf(text):
-    pdf_stream = io.BytesIO()
-    doc = fitz.open()  # Create a new PDF document
-    page = doc.new_page()  # Add a new page
-    page.insert_text((72, 72), text, fontsize=12)  # Insert text with specified font size
-    doc.save(pdf_stream)
-    doc.close()
-    pdf_stream.seek(0)
-    return pdf_stream
-
+# Function to extract text with color from PDF
 def extract_text_with_color(pdf_document):
     content = ""
     for page_num in range(pdf_document.page_count):
         page = pdf_document.load_page(page_num)
         blocks = page.get_text("dict")["blocks"]
         for block in blocks:
-            if "lines" in block:  # Check if the "lines" key exists
+            if "lines" in block:
                 for line in block["lines"]:
                     for span in line["spans"]:
-                        color = span.get("color", 0)  # Default to 0 if color is not present
+                        color = span.get("color", 0)
                         hex_color = f"#{color:06x}"
-                        text = span["text"].strip()  # Strip excess spacing
+                        text = span["text"].strip()
                         if text:
                             content += f"<span style='color:{hex_color};'>{text}</span> "
                     content += "<br>"
             else:
-                # Handle the case where "lines" key is missing
-                # You could log this, or handle it as you see fit
                 print(f"Block missing 'lines' key on page {page_num}")
     return content
 
@@ -98,14 +71,13 @@ st.set_page_config(page_title="Markdown Content Translator", layout="wide")
 st.markdown(
     """
     <style>
-    /* Style for the Quill editor container */
     .ql-editor {
         border: 2px solid blue;
         padding: 10px;
         resize: both;
-        max-height: 500px; /* Adjust as needed */
-        overflow: auto;   /* Add scrollbar */
-        font-weight: bold; /* Make text bold */
+        max-height: 500px;
+        overflow: auto;
+        font-weight: bold;
     }
     .ql-editor.summarized {
         border: 2px solid orange;
@@ -133,7 +105,7 @@ with col1:
         original_content = ""
 
         if file_type == "application/pdf":
-            # Extract text with color from PDF
+            # Extract text from PDF
             pdf_document = fitz.open(stream=uploaded_file.read(), filetype="pdf")
             original_content = extract_text_with_color(pdf_document)
         else:
@@ -216,29 +188,13 @@ with col2:
             unsafe_allow_html=True
         )
 
-        # Download summarized translated content in the original format
-        if st.session_state.file_type == "application/pdf":
-            pdf_stream = text_to_pdf(translated_summarized_text)
-            st.download_button(
-                label="Download Summarized Translated Content (PDF)",
-                data=pdf_stream,
-                file_name="translated_summarized_content.pdf",
-                mime="application/pdf"
-            )
-        elif st.session_state.file_type == "text/markdown":
-            st.download_button(
-                label="Download Summarized Translated Content (Markdown)",
-                data=translated_summarized_text,
-                file_name="translated_summarized_content.md",
-                mime="text/markdown"
-            )
-        else:
-            st.download_button(
-                label="Download Summarized Translated Content (TXT)",
-                data=translated_summarized_text,
-                file_name="translated_summarized_content.txt",
-                mime="text/plain"
-            )
+        # Download summarized translated content in Markdown format
+        st.download_button(
+            label="Download Summarized Translated Content (Markdown)",
+            data=translated_summarized_text,
+            file_name="translated_summarized_content.md",
+            mime="text/markdown"
+        )
 
     # Translate full document button
     if translate_option == "Translate Full Document" and st.button("Translate Full Document"):
@@ -260,26 +216,10 @@ with col2:
                 unsafe_allow_html=True
             )
 
-            # Download full translated content in the original format
-            if st.session_state.file_type == "application/pdf":
-                pdf_stream = text_to_pdf(translated_content)
-                st.download_button(
-                    label="Download Translated Content (PDF)",
-                    data=pdf_stream,
-                    file_name="translated_content.pdf",
-                    mime="application/pdf"
-                )
-            elif st.session_state.file_type == "text/markdown":
-                st.download_button(
-                    label="Download Translated Content (Markdown)",
-                    data=translated_content,
-                    file_name="translated_content.md",
-                    mime="text/markdown"
-                )
-            else:
-                st.download_button(
-                    label="Download Translated Content (TXT)",
-                    data=translated_content,
-                    file_name="translated_content.txt",
-                    mime="text/plain"
-                )
+            # Download full translated content in Markdown format
+            st.download_button(
+                label="Download Translated Content (Markdown)",
+                data=translated_content,
+                file_name="translated_content.md",
+                mime="text/markdown"
+            )
