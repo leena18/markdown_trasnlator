@@ -164,8 +164,8 @@ with col2:
     st.markdown("### Translate Options")
 
     target_language = st.selectbox("Select target language for translation", [
-        "Spanish", "French", "German", "Chinese", "Japanese", "Korean", "Italian", 
-        "Portuguese", "Russian", "Hindi", "Arabic", "Bengali", "Dutch", "Greek", 
+        "Hindi", "French", "German", "Chinese", "Japanese", "Korean", "Italian", 
+        "Portuguese", "Russian", "Spanish", "Arabic", "Bengali", "Dutch", "Greek", 
         "Hebrew", "Swedish", "Turkish", "Vietnamese", "Polish", "Indonesian"
     ])
 
