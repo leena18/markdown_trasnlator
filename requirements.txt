@@ -1,0 +1,7 @@
+streamlit
+markdown2
+pdfplumber
+PyPDF2
+openai
+python-dotenv
+PyMuPDF
